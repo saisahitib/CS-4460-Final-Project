@@ -10,7 +10,7 @@ var margin = {top: 20, right: 190, bottom: 0, left: 40}
 d3.csv("./data/election.csv", function(data){
 
 	// filters the data to only include election data from the year 2000
-	var data_2000 = data.filter(function(d) {
+	var year_data = data.filter(function(d) {
 		return d.year == 2000
 	})
 
@@ -28,7 +28,7 @@ d3.csv("./data/election.csv", function(data){
 		partiesByState = d3.nest()
 			.key(function(d) { return d.state })
 			.key(function(d) { return d.party})
-			.entries(data_2000)
+			.entries(year_data)
 
 		// gets the total number of candidate votes for each individual party within each state and the total number of votes in each state
 		graphData = partiesByState.map(state => { 
@@ -50,7 +50,7 @@ d3.csv("./data/election.csv", function(data){
 				total: total
 			}
 		})
-
+		console.log(graphData)
 		// stores the different parties
 		parties = ['democrat', 'republican', 'green', 'NA']
 
@@ -58,9 +58,10 @@ d3.csv("./data/election.csv", function(data){
 		var stack = d3.stack()
 			.keys(parties)
 			.value((d,key) => {
-				return d.values[key];
+				return d.values[key] || 0;
 			})(graphData)
 
+		console.log(stack)
 		// sorts data
 		partiesByState.sort(function(x, y) {
 			return d3.ascending(x.key, y.key);
@@ -236,7 +237,7 @@ d3.csv("./data/election.csv", function(data){
 			var yearOptions = document.getElementById("years");
 			var yearSelected = yearOptions.value;
 
-			data_2000 = data.filter(function(d) {
+			year_data = data.filter(function(d) {
 				return d.year == yearSelected;
 			})
 
