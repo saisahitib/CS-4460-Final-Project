@@ -10,7 +10,7 @@ var margin = {top: 20, right: 190, bottom: 0, left: 40}
 d3.csv("./data/election.csv", function(data){
 
 	// filters the data to only include election data from the year 2000
-	var data_2000 = data.filter(function(d) {
+	var year_data = data.filter(function(d) {
 		return d.year == 2000
 	})
 
@@ -28,7 +28,7 @@ d3.csv("./data/election.csv", function(data){
 		partiesByState = d3.nest()
 			.key(function(d) { return d.state })
 			.key(function(d) { return d.party})
-			.entries(data_2000)
+			.entries(year_data)
 
 		// gets the total number of candidate votes for each individual party within each state and the total number of votes in each state
 		graphData = partiesByState.map(state => { 
@@ -50,7 +50,7 @@ d3.csv("./data/election.csv", function(data){
 				total: total
 			}
 		})
-
+		console.log(graphData)
 		// stores the different parties
 		parties = ['democrat', 'republican', 'green', 'NA']
 
@@ -58,9 +58,10 @@ d3.csv("./data/election.csv", function(data){
 		var stack = d3.stack()
 			.keys(parties)
 			.value((d,key) => {
-				return d.values[key];
+				return d.values[key] || 0;
 			})(graphData)
 
+		console.log(stack)
 		// sorts data
 		partiesByState.sort(function(x, y) {
 			return d3.ascending(x.key, y.key);
@@ -236,7 +237,7 @@ d3.csv("./data/election.csv", function(data){
 			var yearOptions = document.getElementById("years");
 			var yearSelected = yearOptions.value;
 
-			data_2000 = data.filter(function(d) {
+			year_data = data.filter(function(d) {
 				return d.year == yearSelected;
 			})
 
@@ -363,7 +364,7 @@ d3.csv("./data/election.csv", function(data){
 				document.getElementById("label1").textContent = "State: " + d.data.key;
 			}
 			var count = d[1] - d[0];
-			document.getElementById("label3").textContent = "Count: " + count;
+			document.getElementById("label3").textContent = "Count: " + formatNum(count);
 			var partyName;
 			if (d.data.values.NA == count) {
 				partyName = "NA";
@@ -390,6 +391,7 @@ d3.csv("./data/election.csv", function(data){
 	for (var i = 0; i < graphData.length; i++) {
 		statesArray.push(graphData[i].key);
 	}
+	statesArray.sort()
 	var select = document.getElementById("states");
 	for (var i = 0; i < statesArray.length; i++) {
 		var option = statesArray[i];
@@ -427,12 +429,18 @@ d3.csv("./data/election.csv", function(data){
 			}
 		}
 
+		//checks if count for each party is defined
+		if (Number.isNaN(rCount) || !rCount) rCount = 0;
+		if (Number.isNaN(dCount) || !dCount) dCount = 0;
+		if (Number.isNaN(gCount) || !gCount) gCount = 0;
+		if (Number.isNaN(naCount) || !naCount) naCount = 0;
+
 		document.getElementById("pieLabel").textContent = "STATE"
-		document.getElementById("totalLabel").textContent = "Total: " + totalCount + " (100%)";
-		document.getElementById("dLabel").textContent = "Democrat: " + dCount + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("rLabel").textContent = "Republican: " + rCount + " (" + ((rCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("gLabel").textContent = "Green: " + gCount + " (" + ((gCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("naLabel").textContent = "NA: " + naCount + " (" + ((naCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("totalLabel").textContent = "Total: " + formatNum(totalCount) + " (100%)";
+		document.getElementById("dLabel").textContent = "Democrat: " + formatNum(dCount) + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("rLabel").textContent = "Republican: " + formatNum(rCount) + " (" + ((rCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("gLabel").textContent = "Green: " + formatNum(gCount) + " (" + ((gCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("naLabel").textContent = "NA: " + formatNum(naCount) + " (" + ((naCount/totalCount) * 100).toFixed(2) + "%)";
 
 		var pieData = {r: rCount, d: dCount, g: gCount, na: naCount};
 		var pieColors = d3.scaleOrdinal()
@@ -481,6 +489,13 @@ d3.csv("./data/election.csv", function(data){
 			gCount += graphData[i].values.green;
 			naCount += graphData[i].values.NA;
 		}
+
+		//checks if count for each party is defined
+		if (Number.isNaN(rCount) || !rCount) rCount = 0;
+		if (Number.isNaN(dCount) || !dCount) dCount = 0;
+		if (Number.isNaN(gCount) || !gCount) gCount = 0;
+		if (Number.isNaN(naCount) || !naCount) naCount = 0;
+
 		var pieData = {r: rCount, d: dCount, g: gCount, na: naCount};
 		var pieColors = d3.scaleOrdinal()
 			.domain(data)
@@ -506,11 +521,16 @@ d3.csv("./data/election.csv", function(data){
 			.attr("transform", "translate(90,80)")
 
 		document.getElementById("pieLabel").textContent = "TOTAL";
-		document.getElementById("totalLabel").textContent = "Total: " + totalCount + " (100%)";
-		document.getElementById("dLabel").textContent = "Democrat: " + dCount + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("rLabel").textContent = "Republican: " + rCount + " (" + ((rCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("gLabel").textContent = "Green: " + gCount + " (" + ((gCount/totalCount) * 100).toFixed(2) + "%)";
-		document.getElementById("naLabel").textContent = "NA: " + naCount + " (" + ((naCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("totalLabel").textContent = "Total: " + formatNum(totalCount) + " (100%)";
+		document.getElementById("dLabel").textContent = "Democrat: " + formatNum(dCount) + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("rLabel").textContent = "Republican: " + formatNum(rCount) + " (" + ((rCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("gLabel").textContent = "Green: " + formatNum(gCount) + " (" + ((gCount/totalCount) * 100).toFixed(2) + "%)";
+		document.getElementById("naLabel").textContent = "NA: " + formatNum(naCount) + " (" + ((naCount/totalCount) * 100).toFixed(2) + "%)";
+	}
+
+	//adds commas to numbers
+	function formatNum(x) {
+		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	}
 
 })
