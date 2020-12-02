@@ -6,8 +6,54 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <div id="main">
-        <svg id="svg" width="800" height="600"></svg>
+    <div id="container">
+        <div id="leftbox">
+            <label id="leftLabel">BREAKDOWN</label>
+            <label id="pieLabel">TOTAL</label>
+            <label id="totalLabel"></label>
+            <label id="dLabel"></label>
+            <label id="rLabel"></label>
+            <label id="gLabel"></label>
+            <label id="naLabel"></label>
+            <select name="states" id="states"></select>
+            <button type="button" id="stateButton">CHANGE STATE</button>
+            <button type="button" id="totalButton">SHOW TOTAL</button>
+        </div>
+        <div id="main">
+            <svg id="svg" width="800" height="600"></svg>
+            <div id="tooltip">
+                <label id="label1">State: </label>
+                <label id="label2">Text2</label>
+                <label id="label3">Text3</label>
+            </div>
+        </div>
+        <div id="rightbox">
+            <label id="rightLabel">FILTERING</label>
+
+            <label for="years" id="yearLabel">YEAR</label>
+            <select name="years" id="years">
+                <option value="2000">2000</option>
+                <option value="2004">2004</option>
+                <option value="2008">2008</option>
+                <option value="2012">2012</option>
+                <option value="2016">2016</option>
+            </select>
+            <button type="button" id="yearButton">CHANGE YEAR</button>
+
+            <label for="cutoff" id="cutoffLabel">CUTOFF</label>
+            <input type="number" id="cutoff" value="1">
+            <label id="millionLabel">Million</label>
+            <button type="button" id="filterButton">FILTER DATA</button>
+
+            <label id="sortLabel">SORT</label>
+            <input type="radio" id="alphabetical" name=sort value="alphabetical" checked="checked">
+            <label for="alphabetical" id=alphabeticalLabel>Alphabetical</label>
+            <input type="radio" id="ascending" name=sort value="ascending">
+            <label for="ascending" id=ascendingLabel>Ascending Total</label>
+            <input type="radio" id="descending" name=sort value="descending">
+            <label for="descending" id=descendingLabel>Descending Total</label>
+            <button type="button" id="sortButton">SORT DATA</button>
+        </div>
     </div>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
