@@ -9,7 +9,7 @@
    
 #leftbox {
     height: 600px;
-    width: 200px;
+    width: 205px;
     background-color: beige;
     float:left;
     position: relative;
@@ -219,7 +219,7 @@ label {
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     color: steelblue;
     top: 80px;
-    left: 20px;
+    left: 23px;
 }
 
 #totalLabel {
