@@ -50,7 +50,7 @@ d3.csv("./data/election.csv", function(data){
 				total: total
 			}
 		})
-		console.log(graphData)
+		
 		// stores the different parties
 		parties = ['democrat', 'republican', 'green', 'NA']
 
@@ -61,7 +61,6 @@ d3.csv("./data/election.csv", function(data){
 				return d.values[key] || 0;
 			})(graphData)
 
-		console.log(stack)
 		// sorts data
 		partiesByState.sort(function(x, y) {
 			return d3.ascending(x.key, y.key);
@@ -249,6 +248,7 @@ d3.csv("./data/election.csv", function(data){
 			applyTooltip();
 			pie.remove();
 			makeTotalPie();
+			document.getElementById("alphabetical").checked = "true";
 		})
 		
 	//click on sort data
@@ -349,6 +349,26 @@ d3.csv("./data/election.csv", function(data){
 			makeTotalPie();
 		})
 
+	//click on reset
+	d3.select("#resetButton")
+		.on("click", function(d) {
+			document.getElementById("years").value = 2000;
+			document.getElementById("cutoff").value = 1;
+			document.getElementById("alphabetical").checked = "true";
+			document.getElementById("states").value = "Alabama";
+
+			year_data = data.filter(function(d) {
+				return d.year == 2000;
+			})
+
+			graph.remove();
+			createGraph();
+
+			pie.remove();
+			makeTotalPie();
+
+		})
+
 	function applyTooltip() {
 		tooltip = document.getElementById("tooltip");
 		graph.selectAll("rect")
@@ -410,7 +430,9 @@ d3.csv("./data/election.csv", function(data){
 			.append("svg")
 				.attr("width", pieWidth)
 				.attr("height", pieHeight)
+				.attr("style", "-webkit-transform: translate(10px, 150px)")
 				.attr("transform", "translate(10, 150)")
+				
 
 		var totalCount = 0;
 		var rCount = 0;
@@ -475,6 +497,7 @@ d3.csv("./data/election.csv", function(data){
 			.append("svg")
 				.attr("width", pieWidth)
 				.attr("height", pieHeight)
+				.attr("style", "-webkit-transform: translate(10px, 150px)")
 				.attr("transform", "translate(10, 150)")
 
 		var totalCount = 0;
@@ -504,7 +527,6 @@ d3.csv("./data/election.csv", function(data){
 		var pieChart = d3.pie()
 			.value(function(d) {return d.value;})
 		var readyData = pieChart(d3.entries(pieData))
-		console.log(readyData)
 
 		pie.selectAll("path")
 			.data(readyData)
