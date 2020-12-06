@@ -97,6 +97,11 @@ p {
     display: contents;
 }
 
+/* #piesvg {
+    transform: translate(10, 150);
+    -webkit-transform: translate(10, 150);
+} */
+
 /* styling for buttons */
 button {
     width: 100px;
@@ -144,6 +149,12 @@ button:focus {
 
 #totalButton {
     top:500px;
+    position: absolute;
+    left: 50px;
+}
+
+#resetButton {
+    top: 540px;
     position: absolute;
     left: 50px;
 }

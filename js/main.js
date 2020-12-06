@@ -23,6 +23,7 @@ d3.csv("./data/election.csv", function(data){
 	var x;
 	var y;
 
+	// creates stacked bar chart
 	function createGraph() {
 		// separates the data by states and nests the data for each individual party within each state
 		partiesByState = d3.nest()
@@ -50,7 +51,7 @@ d3.csv("./data/election.csv", function(data){
 				total: total
 			}
 		})
-		console.log(graphData)
+		
 		// stores the different parties
 		parties = ['democrat', 'republican', 'green', 'NA']
 
@@ -61,7 +62,6 @@ d3.csv("./data/election.csv", function(data){
 				return d.values[key] || 0;
 			})(graphData)
 
-		console.log(stack)
 		// sorts data
 		partiesByState.sort(function(x, y) {
 			return d3.ascending(x.key, y.key);
@@ -202,7 +202,7 @@ d3.csv("./data/election.csv", function(data){
 			.text("State")
 	}
 	
-	//initial vis
+	// initial vis setup
 	tooltip.style.display = "none";
 	createGraph();
 	makeTotalPie();
@@ -210,10 +210,12 @@ d3.csv("./data/election.csv", function(data){
 
 	/* FILTERING FUNCTIONALITY*/
 
-	//click on filter data
+	// click on filter data
 	d3.select("#filterButton") 
 		.on("click", function() {
 			var cutoff = document.getElementById("cutoff");
+
+			// hides bars with total less than inputed cutoff
 			graph.selectAll("rect")
 				.attr("visibility", "hidden")
 				.attr("opacity", 0)
@@ -230,28 +232,34 @@ d3.csv("./data/election.csv", function(data){
 			applyTooltip();
 		})
 
-	//click on change year 
+	// click on change year 
 	d3.select("#yearButton")
 		.on("click", function() {
-			//filters data to only include election data from selected year
+
+			// filters data to only include election data from selected year
 			var yearOptions = document.getElementById("years");
 			var yearSelected = yearOptions.value;
 
+			// changes 
 			year_data = data.filter(function(d) {
 				return d.year == yearSelected;
 			})
 
+			// changes stacked bar chart and title to reflect selected year
 			graph.remove();
 			createGraph();
 			d3.select("#electionTitle")
 				.text("Election Results : " + yearSelected)
 
 			applyTooltip();
+
+			// changes pie chart to reflect selected year 
 			pie.remove();
 			makeTotalPie();
+			document.getElementById("alphabetical").checked = "true";
 		})
 		
-	//click on sort data
+	// click on sort data
 	d3.select("#sortButton")
 		.on("click", function() {
 			graph.select(".xaxis").remove();
@@ -260,12 +268,14 @@ d3.csv("./data/election.csv", function(data){
 			var sortChoices = document.getElementsByName("sort");
 			var selectedSort;
 
+			// stores selected sort choice
 			for (var i = 0; i < sortChoices.length; i++) {
 				if(sortChoices[i].checked) {
 					selectedSort = sortChoices[i].value;
 				}
 			}
 
+			// sorts bars to reflect selected sort choice
 			if (selectedSort == "alphabetical") {
 				partiesByState.sort(function(x, y) {
 					return d3.ascending(x.key, y.key);
@@ -294,12 +304,14 @@ d3.csv("./data/election.csv", function(data){
 				})
 			}
 
+			// updates x-axis
 			x = d3.scaleBand()
 				.domain(partiesByState.map(function(d) { return d.key}))
 				.rangeRound([0, width - margin.left - margin.right])
 				.paddingInner(0.05)
 				.align(0.1);
 
+			// positions the x-axis and axis labels and shows it on the graph
 			graph.append("g")
 				.attr("transform", "translate(0," + height + ")")
 				.attr("class", "xaxis")
@@ -313,12 +325,14 @@ d3.csv("./data/election.csv", function(data){
 				.attr("transform", "rotate(-90)")
 				.style("text-anchor", "end")
 
+			// creates the stacked data for the chart - each of the 4 "stacks" contains the y-value ranges for every x-value
 			var stack = d3.stack()
 				.keys(parties)
 				.value((d,key) => {
 					return d.values[key];
 				})(graphData)
 
+			// shows the bars in the chart using the stacked data 
 			graph.append("g")
 				.selectAll("g")
 				.data(stack)
@@ -349,15 +363,43 @@ d3.csv("./data/election.csv", function(data){
 			makeTotalPie();
 		})
 
+	//click on reset
+	d3.select("#resetButton")
+		.on("click", function(d) {
+
+			// resetting elements to intitial values
+			document.getElementById("years").value = 2000;
+			document.getElementById("cutoff").value = 1;
+			document.getElementById("alphabetical").checked = "true";
+			document.getElementById("states").value = "Alabama";
+
+			// filters the data to only include election data from the year 2000
+			year_data = data.filter(function(d) {
+				return d.year == 2000;
+			})
+
+			// updates stacked bar chart
+			graph.remove();
+			createGraph();
+
+			// updates pie chart
+			pie.remove();
+			makeTotalPie();
+
+		})
+
 	function applyTooltip() {
 		tooltip = document.getElementById("tooltip");
 		graph.selectAll("rect")
 		.on("mouseover", function(d) {
-			var xPos = parseFloat(d3.select(this).attr("x"));
-			var yPos = parseFloat(d3.select(this).attr("y"));
 			
+			// highlights bar on hover
 			d3.select(this).attr("stroke", "yellow").attr("stroke-width", 3);
+
+			// displays tooltip box
 			tooltip.style.display = null;
+
+			// updates text of box with information of hovered bar
 			if (d.data.key == "District of Columbia") {
 				document.getElementById("label1").textContent = "State: " + "DC";
 			} else {
@@ -378,21 +420,25 @@ d3.csv("./data/election.csv", function(data){
 			document.getElementById("label2").textContent = "Party: " + partyName;
 		})
 		.on("mouseout", function(d) {
+			// turns off highlight of hovered bar and removes text
 			d3.select(this).attr("stroke-width", 0);
 			graph.select(".tooltip").remove();
 			graph.select("#tooltipText").remove();
 
+			// hides tooltip box
 			tooltip.style.display = "none";
 		})
 	}
 
-	//set up state selection box
+	// sets up state selection box
 	var statesArray = [];
 	for (var i = 0; i < graphData.length; i++) {
 		statesArray.push(graphData[i].key);
 	}
 	statesArray.sort()
 	var select = document.getElementById("states");
+
+	// updates selection box with list of states
 	for (var i = 0; i < statesArray.length; i++) {
 		var option = statesArray[i];
 		var element = document.createElement("option");
@@ -401,16 +447,21 @@ d3.csv("./data/election.csv", function(data){
 		select.appendChild(element);
 	}
 
-	//making the state pie chart
+	// makes the state pie chart
 	function makeStatePie() {
+
+		// stores dimensions
 		var pieWidth = 180;
 		var pieHeight = 250;
 
+		// creates svg with specified dimensions and appends it
 		pie = d3.select("#leftbox")
 			.append("svg")
 				.attr("width", pieWidth)
 				.attr("height", pieHeight)
+				.attr("style", "-webkit-transform: translate(10px, 150px)")
 				.attr("transform", "translate(10, 150)")
+				
 
 		var totalCount = 0;
 		var rCount = 0;
@@ -418,7 +469,7 @@ d3.csv("./data/election.csv", function(data){
 		var gCount = 0;
 		var naCount = 0;
 
-		//change based on state selected
+		// change based on state selected
 		for (var i = 0; i < graphData.length; i++) {
 			if (document.getElementById("states").value == graphData[i].key) {
 				totalCount = graphData[i].total;
@@ -429,12 +480,13 @@ d3.csv("./data/election.csv", function(data){
 			}
 		}
 
-		//checks if count for each party is defined
+		// checks if count for each party is defined
 		if (Number.isNaN(rCount) || !rCount) rCount = 0;
 		if (Number.isNaN(dCount) || !dCount) dCount = 0;
 		if (Number.isNaN(gCount) || !gCount) gCount = 0;
 		if (Number.isNaN(naCount) || !naCount) naCount = 0;
 
+		// updates text with selected state data
 		document.getElementById("pieLabel").textContent = "STATE"
 		document.getElementById("totalLabel").textContent = "Total: " + formatNum(totalCount) + " (100%)";
 		document.getElementById("dLabel").textContent = "Democrat: " + formatNum(dCount) + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
@@ -442,16 +494,18 @@ d3.csv("./data/election.csv", function(data){
 		document.getElementById("gLabel").textContent = "Green: " + formatNum(gCount) + " (" + ((gCount/totalCount) * 100).toFixed(2) + "%)";
 		document.getElementById("naLabel").textContent = "NA: " + formatNum(naCount) + " (" + ((naCount/totalCount) * 100).toFixed(2) + "%)";
 
+		// sets up pie and colors
 		var pieData = {r: rCount, d: dCount, g: gCount, na: naCount};
 		var pieColors = d3.scaleOrdinal()
 			.domain(data)
 			.range(["Orange", "Red", 'Blue', 'Green'])
 
+		// creates pie chart data
 		var pieChart = d3.pie()
 			.value(function(d) {return d.value;})
 		var readyData = pieChart(d3.entries(pieData))
-		console.log(readyData)
 
+		// creates the pie chart using data
 		pie.selectAll("path")
 			.data(readyData)
 			.enter()
@@ -467,14 +521,18 @@ d3.csv("./data/election.csv", function(data){
 			.attr("transform", "translate(90,80)")
 	}
 
+	// makes the total pie chart
 	function makeTotalPie() {
+		// stores dimensions
 		var pieWidth = 180;
 		var pieHeight = 250;
 
+		// creates svg with specified dimensions and appends it
 		pie = d3.select("#leftbox")
 			.append("svg")
 				.attr("width", pieWidth)
 				.attr("height", pieHeight)
+				.attr("style", "-webkit-transform: translate(10px, 150px)")
 				.attr("transform", "translate(10, 150)")
 
 		var totalCount = 0;
@@ -482,6 +540,8 @@ d3.csv("./data/election.csv", function(data){
 		var dCount = 0;
 		var gCount = 0;
 		var naCount = 0;
+
+		// stores total count of each party for selected year
 		for (var i = 0; i < graphData.length; i++) {
 			totalCount += graphData[i].total;
 			rCount += graphData[i].values.republican;
@@ -496,16 +556,18 @@ d3.csv("./data/election.csv", function(data){
 		if (Number.isNaN(gCount) || !gCount) gCount = 0;
 		if (Number.isNaN(naCount) || !naCount) naCount = 0;
 
+		// sets up pie and colors
 		var pieData = {r: rCount, d: dCount, g: gCount, na: naCount};
 		var pieColors = d3.scaleOrdinal()
 			.domain(data)
 			.range(["Orange", "Red", 'Blue', 'Green'])
 
+		// creates pie chart data
 		var pieChart = d3.pie()
 			.value(function(d) {return d.value;})
 		var readyData = pieChart(d3.entries(pieData))
-		console.log(readyData)
 
+		// creates the pie chart using data
 		pie.selectAll("path")
 			.data(readyData)
 			.enter()
@@ -520,6 +582,7 @@ d3.csv("./data/election.csv", function(data){
 			.style("opacity", .45)
 			.attr("transform", "translate(90,80)")
 
+		// updates text with data for each party
 		document.getElementById("pieLabel").textContent = "TOTAL";
 		document.getElementById("totalLabel").textContent = "Total: " + formatNum(totalCount) + " (100%)";
 		document.getElementById("dLabel").textContent = "Democrat: " + formatNum(dCount) + " (" + ((dCount/totalCount) * 100).toFixed(2) + "%)";
